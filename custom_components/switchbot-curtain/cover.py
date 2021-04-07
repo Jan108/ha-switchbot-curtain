@@ -70,8 +70,12 @@ class SwitchBotCurtain(CoverEntity, RestoreEntity):
 
     @property
     def assumed_state(self) -> bool:
-        """Return true if unable to access real state of entity."""
-        return False
+        """Return true if unable to access real state of entity.
+
+        Should return False, but default cover card disables
+        open if position=100 / close if position=0. See frontend/src/util/cover-model.js
+        This is a problem if reversed=False. Easy fix return not is_reversed """
+        return not self._device.is_reversed()
 
     @property
     def should_poll(self) -> bool:
@@ -126,7 +130,7 @@ class SwitchBotCurtain(CoverEntity, RestoreEntity):
         _LOGGER.info('Switchbot to open curtain %s...', self._mac)
 
         """Open curtain"""
-        self._last_run_success = self._device.set_position(0)
+        self._last_run_success = self._device.open()
 
     def close_cover(self, **kwargs) -> None:
         """Close the curtain with using this device."""
@@ -134,7 +138,7 @@ class SwitchBotCurtain(CoverEntity, RestoreEntity):
         _LOGGER.info('Switchbot to close the curtain %s...', self._mac)
 
         """Close curtain"""
-        self._last_run_success = self._device.set_position(100)
+        self._last_run_success = self._device.close()
 
     def stop_cover(self, **kwargs) -> None:
         """Stop the moving of this device."""
